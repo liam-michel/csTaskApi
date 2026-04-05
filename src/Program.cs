@@ -1,19 +1,6 @@
 using TaskApi.Services;
-using TaskApi.Repositories;
-using Microsoft.EntityFrameworkCore;
-using TaskApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-//get connection string
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-//add DbContext 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
-
-//add repos to DI container
-builder.Services.AddScoped<ITaskRepository, TaskItemRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Add services to DI container
 builder.Services.AddScoped<ITaskService, TaskService>();
