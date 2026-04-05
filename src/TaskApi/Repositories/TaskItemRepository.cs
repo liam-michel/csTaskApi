@@ -25,13 +25,13 @@ public class TaskItemRepository(AppDbContext context) : ITaskRepository
             .ToListAsync();
     }
 
-    public async Task<TaskItem> CreateAsync(CreateTaskItem newTask)
+    public async Task<TaskItem> CreateAsync(CreateTaskRequest request)
     {
         var task = new TaskItem
         {
-            Title = newTask.Title,
-            Description = newTask.Description,
-            UserId = newTask.UserId
+            Title = request.Title,
+            Description = request.Description,
+            UserId = request.UserId
 
         };
         _context.Tasks.Add(task);
@@ -39,14 +39,14 @@ public class TaskItemRepository(AppDbContext context) : ITaskRepository
         return task;
     }
 
-    public async Task<TaskItem?> UpdateAsync(UpdateTaskItem updatedTask)
+    public async Task<TaskItem?> UpdateAsync(UpdateTaskRequest request)
     {
-        var task = await _context.Tasks.FindAsync(updatedTask.Id);
+        var task = await _context.Tasks.FindAsync(request.Id);
         if (task == null) return null;
 
-        task.Title = updatedTask.Title;
-        task.Description = updatedTask.Description;
-        task.IsCompleted = updatedTask.IsCompleted;
+        task.Title = request.Title;
+        task.Description = request.Description;
+        task.IsCompleted = request.IsCompleted;
 
         await _context.SaveChangesAsync();
         return task;

@@ -4,10 +4,11 @@ namespace TaskApi.Repositories;
 
 public interface IUserRepository
 {
-  Task<List<User>> GetAllUsersAsync();
-  Task<User?> GetUserByIdAsync(int id);
-  Task<User> AddUserAsync(AddUser newUser);
-  Task<User> UpdateUserDetailsAsync(UpdateUserDetails updatedUser);
-  Task<User> UpdateUserPasswordAsync(UpdateUserPassword updatedUser);
-  Task<bool> DeleteUserAsync(int id);
+  Task<List<User>> GetAllAsync();
+  Task<User?> GetByIdAsync(int id);
+  Task<User?> GetByEmailAsync(string email);
+  Task<User> AddAsync(CreateUserRequest request);
+  Task<User> UpdateDetailsAsync(UpdateUserDetailsRequest request);
+  Task<User> UpdateUserPasswordAsync(UpdateUserPasswordRequest request);
+  Task<bool> DeleteAsync(int id);
 }

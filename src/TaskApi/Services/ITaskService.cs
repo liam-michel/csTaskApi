@@ -1,12 +1,14 @@
 using TaskApi.Models;
+using TaskApi.Models.Dtos;
 
 namespace TaskApi.Services;
 
 public interface ITaskService
 {
-    Task<List<TaskItem>> GetAllTasksAsync();
-    Task<TaskItem?> GetTaskByIdAsync(int id);
-    Task<TaskItem> CreateTaskAsync(TaskItem task);
-    Task<TaskItem?> UpdateTaskAsync(int id, TaskItem task);
-    Task<bool> DeleteTaskAsync(int id);
+    Task<List<TaskItem>> GetAllAsync();
+    Task<List<TaskItem>> GetAllByUserAsync(int userId);
+    Task<TaskItem?> GetByIdAsync(int id, int userId);
+    Task<TaskItem> CreateAsync(CreateTaskRequest request);
+    Task<TaskItem?> UpdateAsync(UpdateTaskRequest request, int userId);
+    Task<bool> DeleteAsync(int id, int userId);
 }

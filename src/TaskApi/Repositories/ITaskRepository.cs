@@ -6,8 +6,9 @@ namespace TaskApi.Repositories;
 public interface ITaskRepository
 {
   Task<List<TaskItem>> GetAllAsync();
+  Task<List<TaskItem>> GetByUserIdAsync(int userId);
   Task<TaskItem?> GetByIdAsync(int id);
-  Task<TaskItem> CreateAsync(CreateTaskItem newTask);
-  Task<TaskItem?> UpdateAsync(UpdateTaskItem updatedTask);
+  Task<TaskItem> CreateAsync(CreateTaskRequest request);
+  Task<TaskItem?> UpdateAsync(UpdateTaskRequest request);
   Task<bool> DeleteAsync(int id);
 }

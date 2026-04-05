@@ -1,48 +1,66 @@
 using TaskApi.Models;
+using TaskApi.UnitOfWork;
+using TaskApi.Models.Dtos;
+
 namespace TaskApi.Services;
 
-public class TaskService : ITaskService
+public class TaskItemService : ITaskService, IDisposable
 {
-  private static List<TaskItem> _tasks = new();
-  private static int _nextId = 1;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<TaskItemService> _logger;
+    private readonly IDisposable? _logScope;
 
-  public Task<List<TaskItem>> GetAllTasksAsync()
-  {
-    return Task.FromResult(_tasks);
-  }
+    public TaskItemService(IUnitOfWork unitOfWork, ILogger<TaskItemService> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+        _logScope = logger.BeginScope("{Layer}", "TaskService");
+    }
 
-  public Task<TaskItem?> GetTaskByIdAsync(int id)
-  {
-    var task = _tasks.FirstOrDefault(t => t.Id == id);
-    return Task.FromResult(task);
-  }
-  public Task<TaskItem> CreateTaskAsync(TaskItem task)
-  {
-    task.Id = _nextId++;
-    _tasks.Add(task);
-    return Task.FromResult(task);
-  }
-  public Task<TaskItem?> UpdateTaskAsync(int id, TaskItem task)
-  {
-    var existingTask = _tasks.FirstOrDefault(t => t.Id == id);
-    if (existingTask == null)
+    public void Dispose()
     {
-      return Task.FromResult<TaskItem?>(null);
+        _logScope?.Dispose();
+        GC.SuppressFinalize(this);
     }
-    existingTask.Title = task.Title;
-    existingTask.Description = task.Description;
-    existingTask.IsCompleted = task.IsCompleted;
-    return Task.FromResult<TaskItem?>(existingTask);
-  }
-  public Task<bool> DeleteTaskAsync(int id)
-  {
-    var task = _tasks.FirstOrDefault(t => t.Id == id);
-    if (task == null)
+
+    public async Task<List<TaskItem>> GetAllAsync()
     {
-      return Task.FromResult(false);
+        return await _unitOfWork.TaskItems.GetAllAsync();
     }
-    _tasks.Remove(task);
-    return Task.FromResult(true);
-  }
-  
+
+    public async Task<List<TaskItem>> GetAllByUserAsync(int userId)
+    {
+        return await _unitOfWork.TaskItems.GetByUserIdAsync(userId);
+    }
+
+    public async Task<TaskItem?> GetByIdAsync(int id, int userId)
+    {
+        var task = await _unitOfWork.TaskItems.GetByIdAsync(id);
+        if (task == null || task.UserId != userId) return null;
+        return task;
+    }
+
+    public async Task<TaskItem> CreateAsync(CreateTaskRequest request)
+    {
+        _logger.LogInformation("Creating task: {Title}", request.Title);
+        return await _unitOfWork.TaskItems.CreateAsync(request);
+    }
+
+    public async Task<TaskItem?> UpdateAsync(UpdateTaskRequest request, int userId)
+    {
+        var task = await _unitOfWork.TaskItems.GetByIdAsync(request.Id);
+        if (task == null || task.UserId != userId) return null;
+
+        _logger.LogInformation("Updating task {TaskId}", request.Id);
+        return await _unitOfWork.TaskItems.UpdateAsync(request);
+    }
+
+    public async Task<bool> DeleteAsync(int id, int userId)
+    {
+        var task = await _unitOfWork.TaskItems.GetByIdAsync(id);
+        if (task == null || task.UserId != userId) return false;
+
+        _logger.LogInformation("Deleting task {TaskId}", id);
+        return await _unitOfWork.TaskItems.DeleteAsync(id);
+    }
 }
